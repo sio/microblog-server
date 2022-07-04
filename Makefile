@@ -10,3 +10,7 @@ test: | $(VENV)/tox
 .PHONY: test-interactive
 test-interactive: | $(VENV)/pytest
 	$(VENV)/pytest -rA --color=yes -vv --pdb
+
+.PHONY: clean
+clean:
+	git clean -idx
