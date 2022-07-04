@@ -11,7 +11,7 @@ import markdown as md
 URL = re.compile(r'((?:https?|mailto|ftp|gopher|gemini)://\S+)', re.IGNORECASE)
 
 
-def plaintext(text, escape=html.escape)
+def plaintext(text, escape=html.escape):
     output = []
     for paragraph in text.split('\n\n'):
         if not paragraph.strip():

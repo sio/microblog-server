@@ -42,6 +42,7 @@ class GitStorage(MicroblogStorage):
         filename = self._path(uid)
         with filename.open('w') as out:
             yaml.dump(entry.dict(), out)
+        return uid
 
     def read(self, uid):
         filename = self._path(uid)
