@@ -13,7 +13,7 @@ YAML_PARAMS = dict(
 )
 
 def _str_presenter(dumper, data):  # https://stackoverflow.com/a/33300001
-    if '\n' in data:
+    if any(x in data for x in """\n"':&*"""):
         return dumper.represent_scalar('tag:yaml.org,2002:str', data, style='|')
     return dumper.represent_scalar('tag:yaml.org,2002:str', data)
 
