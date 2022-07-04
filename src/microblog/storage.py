@@ -10,8 +10,11 @@ import string
 
 import git
 
-from . import MicroblogEntry
-from . import yaml
+from . import (
+    MicroblogEntry,
+    log,
+    yaml,
+)
 
 
 class MicroblogStorage(ABC):
@@ -42,10 +45,12 @@ class GitStorage(MicroblogStorage):
         filename = self._path(uid)
         with filename.open('w') as out:
             yaml.dump(entry.dict(), out)
+        log.debug(f'Saved microblog entry to {filename}')
         return uid
 
     def read(self, uid):
         filename = self._path(uid)
+        log.debug(f'Reading {filename}')
         with filename.open() as file_:
             return MicroblogEntry(**yaml.load(file_))
 

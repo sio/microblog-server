@@ -2,6 +2,7 @@ from dataclasses import dataclass, asdict
 from datetime import datetime
 
 from . import renderers
+from .logging import log
 
 
 @dataclass
