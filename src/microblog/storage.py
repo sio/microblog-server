@@ -31,11 +31,20 @@ class MicroblogStorage(ABC):
     def read(self, uid) -> MicroblogEntry:
         '''Read microblog entry from storage'''
 
+    @abstractmethod
+    def uids(self):
+        '''Yield saved uids in reverse chronological order'''
+
+    def __iter__(self):
+        return (self.read(uid) for uid in self.uids())
+
 
 class GitStorage(MicroblogStorage):
     '''
     Store microblog entries in a directory tracked by Git
     '''
+
+    RECORD_EXTENSION = '.yml'
 
     def __init__(self, directory):
         self.repo = git.Repo(directory)
@@ -67,9 +76,19 @@ class GitStorage(MicroblogStorage):
         with filename.open() as file_:
             return MicroblogEntry(**yaml.load(file_))
 
+    def uids(self):
+        extension = self.RECORD_EXTENSION
+        for directory in sorted(self.path.iterdir(), reverse=True):
+            if not directory.is_dir():
+                continue
+            for filename in sorted(directory.glob(f'*{extension}'), reverse=True):
+                if filename.is_dir():
+                    continue
+                yield filename.name[:-len(extension)]
+
     def _path(self, uid, suffix=''):
         dirname = f'{uid[:6]}'
-        extension = '.yml'
+        extension = self.RECORD_EXTENSION
         if suffix:
             suffix = f'+{suffix}'
         filename = f'{uid}{extension}{suffix}'

@@ -24,3 +24,8 @@ def test_save(repo, caplog):
 
     returned = storage.read(uid)
     assert entry == returned
+
+    assert uid == next(storage.uids())
+    for item in storage:
+        assert entry == item
+        break  # we check only the newest item
