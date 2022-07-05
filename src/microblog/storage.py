@@ -7,6 +7,8 @@ from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
 from textwrap import shorten
+from threading import Thread
+from time import sleep
 import random
 import string
 
@@ -57,10 +59,12 @@ class GitStorage(MicroblogStorage):
     '''
 
     RECORD_EXTENSION = '.yml'
+    GIT_PUSH_MIN_DELAY_SECONDS = 30
 
     def __init__(self, directory):
         self.repo = git.Repo(directory)
         self.path = Path(directory)
+        Thread(target=self._pusher, daemon=True).start()
 
     def save(self, entry):
         uid = entry.uid
@@ -114,14 +118,33 @@ class GitStorage(MicroblogStorage):
         if not message:
             message = str(path)
         commit = repo.index.commit(message)
+        has_parents = False
+        for parent in commit.iter_parents():
+            has_parents = True
+            if commit.tree != parent.tree:
+                break
+        else:
+            if has_parents:
+                log.debug(f'Reverting empty commit: {commit}')
+                repo.active_branch.commit = parent
 
     def _push(self):
         repo = self.repo
-        if repo.active_branch.tracking_branch():
+        local_branch = repo.active_branch
+        remote_branch = repo.active_branch.tracking_branch()
+        if remote_branch:
+            if remote_branch.commit == local_branch.commit:
+                return
             for remote in repo.remotes:
                 try:
                     remote.push().raise_if_error()
                 except Exception as e:
                     log.exception(f'Error while pushing to remote: {remote}')
         else:
-            log.warning(f'Not pushing commit {commit}, no tracking branch configured')
+            log.warning(f'Not pushing, no tracking branch configured')
+
+    def _pusher(self):
+        '''Thread that pushes changes regularly'''
+        while True:
+            self._push()
+            sleep(self.GIT_PUSH_MIN_DELAY_SECONDS)
