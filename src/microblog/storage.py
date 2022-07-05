@@ -3,7 +3,7 @@ Save microblog entries
 '''
 
 from abc import ABC, abstractmethod
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from textwrap import shorten
 import random
@@ -67,16 +67,17 @@ class GitStorage(MicroblogStorage):
         with filename.open() as file_:
             return MicroblogEntry(**yaml.load(file_))
 
-    def _path(self, uid, suffix=None):
-        dirname = f'{uid[:4]}'
-        suffix = suffix or 'yml'
-        filename = f'{uid}.{suffix}'
+    def _path(self, uid, suffix=''):
+        dirname = f'{uid[:6]}'
+        extension = '.yml'
+        if suffix:
+            suffix = f'+{suffix}'
+        filename = f'{uid}{extension}{suffix}'
         return self.path / dirname / filename
 
     def _new_uid(self):
-        now = datetime.now()
-        year = now.strftime('%Y')
-        timestamp = now.strftime('%Y%m%d_%H%M')
+        now = datetime.now(timezone.utc)
+        timestamp = now.strftime('%Y%m%d_%H%M%S_%f')
         while True:
             suffix = ''.join(random.choices(string.ascii_letters, k=6))
             uid = f'{timestamp}_{suffix}'
