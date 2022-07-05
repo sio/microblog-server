@@ -64,6 +64,7 @@ class GitStorage(MicroblogStorage):
     def __init__(self, directory):
         self.repo = git.Repo(directory)
         self.path = Path(directory)
+        self._actor = git.Actor('microblog', '')
         Thread(target=self._pusher, daemon=True).start()
 
     def save(self, entry):
@@ -117,7 +118,7 @@ class GitStorage(MicroblogStorage):
         repo.index.add([str(path.relative_to(self.path))])
         if not message:
             message = str(path)
-        commit = repo.index.commit(message)
+        commit = repo.index.commit(message, author=self._actor, committer=self._actor)
         has_parents = False
         for parent in commit.iter_parents():
             has_parents = True
