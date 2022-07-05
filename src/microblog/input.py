@@ -4,7 +4,13 @@ Acquire microblog entries
 
 from abc import ABC, abstractmethod
 
-from telegram.ext import ApplicationBuilder, CommandHandler
+from telegram.ext import (
+        ApplicationBuilder,
+        CommandHandler,
+        MessageHandler,
+        filters,
+)
+from . import MicroblogEntry
 
 
 class MicroblogInput(ABC):
@@ -35,6 +41,10 @@ class TelegramInput(MicroblogInput):
             start = self.start,
         ).items():
             self.app.add_handler(CommandHandler(command, handler))
+        self.app.add_handler(MessageHandler(
+            filters.Chat(username=self.allowed_users) & ~filters.COMMAND,
+            self.microblog
+        ))
 
     def run(self):
         self.app.run_polling()
@@ -42,6 +52,18 @@ class TelegramInput(MicroblogInput):
     def allowed(self, update):
         '''Check if we should allow to process this message'''
         return update.effective_user.username in self.allowed_users
+
+    async def microblog(self, update, context):
+        '''Save microblog message to storage'''
+        user = update.effective_user
+        message = update.message
+        entry = MicroblogEntry(
+            timestamp=message.date,
+            author=f'{user.first_name} {user.last_name}'.strip(),
+            content=message.text,
+            markup='plaintext',
+        )
+        self.storage.save(entry)
 
     async def hello(self, update, context):
         if not self.allowed(update):
