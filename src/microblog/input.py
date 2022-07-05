@@ -56,7 +56,7 @@ class TelegramInput(MicroblogInput):
     async def microblog(self, update, context):
         '''Save microblog message to storage'''
         user = update.effective_user
-        message = update.message
+        message = update.effective_message
         entry = MicroblogEntry(
             timestamp=message.date,
             author=f'{user.first_name} {user.last_name}'.strip(),
