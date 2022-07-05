@@ -35,6 +35,10 @@ class MicroblogStorage(ABC):
     def uids(self):
         '''Yield saved uids in reverse chronological order'''
 
+    def latest(self):
+        '''Return the latest microblog entry'''
+        return next(iter(self))
+
     def __iter__(self):
         return (self.read(uid) for uid in self.uids())
 

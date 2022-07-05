@@ -10,7 +10,7 @@ from telegram.ext import (
         MessageHandler,
         filters,
 )
-from . import MicroblogEntry
+from . import MicroblogEntry, log
 
 
 class MicroblogInput(ABC):
@@ -27,6 +27,8 @@ class TelegramInput(MicroblogInput):
     '''
     Receive microblog entries via Telegram bot
     '''
+
+    PHOTO_CAPTION_MAX_DELAY_SECONDS = 60
 
     def __init__(self, storage, token, allowed_users=None):
         self.storage = storage
@@ -55,15 +57,29 @@ class TelegramInput(MicroblogInput):
 
     async def microblog(self, update, context):
         '''Save microblog message to storage'''
+        response = []
         user = update.effective_user
         message = update.effective_message
         entry = MicroblogEntry(
             timestamp=message.date,
             author=f'{user.first_name} {user.last_name}'.strip(),
-            content=message.text,
+            content=message.text or '',
             markup='plaintext',
         )
-        self.storage.save(entry)
+        log.debug(f'Current:  {entry.uid}')
+
+        prev = self.storage.latest()
+        log.debug(f'Previous: {prev.uid}')
+        delay = entry.timestamp - prev.timestamp
+        max_delay = self.PHOTO_CAPTION_MAX_DELAY_SECONDS
+        if message.photo and not entry.content \
+        and 0 <= delay.total_seconds() <= max_delay \
+        and entry.author == prev.author:
+            entry = prev
+            response.append('Attached photos to previous microblog entry')
+        uid = self.storage.save(entry)
+        response.append(f'Saved microblog entry: {uid}')
+        await message.reply_text('\n'.join(response))
 
     async def hello(self, update, context):
         if not self.allowed(update):
