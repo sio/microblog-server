@@ -63,7 +63,7 @@ class TelegramInput(MicroblogInput):
         entry = MicroblogEntry(
             timestamp=message.date,
             author=f'{user.first_name} {user.last_name}'.strip(),
-            content=message.text or '',
+            content=message.text or message.caption or '',
             markup='plaintext',
         )
         log.debug(f'Current:  {entry.uid}')
