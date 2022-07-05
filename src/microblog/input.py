@@ -79,6 +79,20 @@ class TelegramInput(MicroblogInput):
             response.append('Attached photos to previous microblog entry')
         uid = self.storage.save(entry)
         response.append(f'Saved microblog entry: {uid}')
+
+        photos_seen = set()
+        for photo in sorted(message.photo, key=lambda x: x.width, reverse=True):
+            name = photo.file_unique_id.split('-')[0]
+            if name in photos_seen:
+                log.debug(f'Skipping photo: {name}')
+                continue
+            log.debug(f'Saving photo: {name}')
+            photos_seen.add(name)
+            remote = await photo.get_file()
+            with self.storage.attachment(entry, name=name, writable=True) as local:
+                await remote.download(out=local)
+                log.debug(f'Downloaded photo: {name}')
+
         await message.reply_text('\n'.join(response))
 
     async def hello(self, update, context):

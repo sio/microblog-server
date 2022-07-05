@@ -3,6 +3,7 @@ Save microblog entries
 '''
 
 from abc import ABC, abstractmethod
+from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
 from textwrap import shorten
@@ -34,6 +35,10 @@ class MicroblogStorage(ABC):
     @abstractmethod
     def uids(self):
         '''Yield saved uids in reverse chronological order'''
+
+    @abstractmethod
+    def attachment(self, entry):
+        '''Context manager that yields a file-like objects for writing attachments to'''
 
     def latest(self):
         '''Return the latest microblog entry'''
@@ -74,6 +79,14 @@ class GitStorage(MicroblogStorage):
         else:
             log.warning(f'Not pushing commit {commit}, no tracking branch configured')
         return uid
+
+    @contextmanager
+    def attachment(self, entry, name=None, writable=False):
+        path = self._path(entry.uid, suffix=name)
+        if not path.parent.exists():
+            raise RuntimeError(f'Can not save attachments for unsaved entry: {entry.uid}')
+        with open(path, 'wb' if writable else 'rb') as f:
+            yield f
 
     def read(self, uid):
         filename = self._path(uid)
