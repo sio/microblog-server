@@ -54,11 +54,11 @@ class GitStorage(MicroblogStorage):
         uid = entry.uid
         filename = self._path(uid)
         filename.parent.mkdir(parents=True, exist_ok=True)
-        with filename.open('w') as out:
+        with filename.open('w', newline='\n') as out:
             yaml.dump(entry.dict(), out)
         log.debug(f'Saved microblog entry to {filename}')
         repo = self.repo
-        repo.index.add([str(filename)])
+        repo.index.add([str(filename.relative_to(self.path))])
         message = f'Microblog: {shorten(entry.content, width=40, placeholder="…")}'
         commit = repo.index.commit(message)
         if repo.active_branch.tracking_branch():
