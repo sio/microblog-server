@@ -2,12 +2,12 @@
 
 ## Storage
 
-- Save microblog attachments (pictures)
 - Optimize images when saving
+- Do not create empty commits
 
 ## Input
 
-- Experiment with Telegram bot
+- Does Telegram support rich text formatting?
 
 ## Rendering
 
