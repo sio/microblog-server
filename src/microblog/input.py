@@ -83,7 +83,7 @@ class TelegramInput(MicroblogInput):
 
         photos_seen = set()
         for photo in sorted(message.photo, key=lambda x: x.width, reverse=True):
-            name = photo.file_unique_id.split('-')[0]
+            name = photo.file_unique_id[:10]  # TODO: how do we distinguish between multiple sizes of the same pic?
             if name in photos_seen:
                 log.debug(f'Skipping photo: {name}')
                 continue
