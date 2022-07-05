@@ -49,10 +49,13 @@ class MicroblogEntry:
     @property
     def uid(self):
         timestamp = self.timestamp.strftime('%Y%m%d_%H%M%S_%f')
-        constants = dict(
-            timestamp=self.timestamp,
-            author=self.author,
+        constants = json.dumps(
+            dict(
+                isotime=self.isotime(),
+                author=self.author,
+            ),
+            **JSON_PARAMS
         )
-        suffix = checksum(json.dumps(constants, **JSON_PARAMS).encode()).hexdigest()
+        suffix = checksum(constants.encode()).hexdigest()
         uid = f'{timestamp}_{suffix[-6:]}'
         return uid
