@@ -69,18 +69,8 @@ class GitStorage(MicroblogStorage):
         with filename.open('w', newline='\n') as out:
             yaml.dump(entry.dict(), out)
         log.debug(f'Saved microblog entry to {filename}')
-        repo = self.repo
-        repo.index.add([str(filename.relative_to(self.path))])
         message = f'Microblog: {shorten(entry.content, width=40, placeholder="…")}'
-        commit = repo.index.commit(message)
-        if repo.active_branch.tracking_branch():
-            for remote in repo.remotes:
-                try:
-                    remote.push().raise_if_error()
-                except Exception as e:
-                    log.exception(f'Error while pushing to remote: {remote}')
-        else:
-            log.warning(f'Not pushing commit {commit}, no tracking branch configured')
+        self._commit(filename, message)
         return uid
 
     @contextmanager
@@ -90,6 +80,7 @@ class GitStorage(MicroblogStorage):
             raise RuntimeError(f'Can not save attachments for unsaved entry: {entry.uid}')
         with open(path, 'wb' if writable else 'rb') as f:
             yield f
+        self._commit(path, f'Attachment: {path.name}')
 
     def read(self, uid):
         filename = self._path(uid)
@@ -114,3 +105,23 @@ class GitStorage(MicroblogStorage):
             suffix = f'+{suffix}'
         filename = f'{uid}{extension}{suffix}'
         return self.path / dirname / filename
+
+    def _commit(self, path, message=''):
+        repo = self.repo
+        if not isinstance(path, Path):
+            path = Path(path)
+        repo.index.add([str(path.relative_to(self.path))])
+        if not message:
+            message = str(path)
+        commit = repo.index.commit(message)
+
+    def _push(self):
+        repo = self.repo
+        if repo.active_branch.tracking_branch():
+            for remote in repo.remotes:
+                try:
+                    remote.push().raise_if_error()
+                except Exception as e:
+                    log.exception(f'Error while pushing to remote: {remote}')
+        else:
+            log.warning(f'Not pushing commit {commit}, no tracking branch configured')
