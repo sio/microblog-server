@@ -2,6 +2,9 @@ SETUP_PY=setup.cfg
 include Makefile.venv
 include makefiles/*.mk
 
+.PHONY: run
+run: | venv
+	$(VENV)/microblog
 
 .PHONY: test
 test: | $(VENV)/tox
