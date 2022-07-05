@@ -69,14 +69,15 @@ class TelegramInput(MicroblogInput):
         log.debug(f'Current:  {entry.uid}')
 
         prev = self.storage.latest()
-        log.debug(f'Previous: {prev.uid}')
-        delay = entry.timestamp - prev.timestamp
-        max_delay = self.PHOTO_CAPTION_MAX_DELAY_SECONDS
-        if message.photo and not entry.content \
-        and 0 <= delay.total_seconds() <= max_delay \
-        and entry.author == prev.author:
-            entry = prev
-            response.append('Attached photos to previous microblog entry')
+        if prev:
+            log.debug(f'Previous: {prev.uid}')
+            delay = entry.timestamp - prev.timestamp
+            max_delay = self.PHOTO_CAPTION_MAX_DELAY_SECONDS
+            if message.photo and not entry.content \
+            and 0 <= delay.total_seconds() <= max_delay \
+            and entry.author == prev.author:
+                entry = prev
+                response.append('Attached photos to previous microblog entry')
         uid = self.storage.save(entry)
         response.append(f'Saved microblog entry: {uid}')
 

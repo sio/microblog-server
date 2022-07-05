@@ -42,7 +42,10 @@ class MicroblogStorage(ABC):
 
     def latest(self):
         '''Return the latest microblog entry'''
-        return next(iter(self))
+        try:
+            return next(iter(self))
+        except StopIteration:
+            return None
 
     def __iter__(self):
         return (self.read(uid) for uid in self.uids())
