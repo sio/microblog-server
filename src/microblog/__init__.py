@@ -1,9 +1,17 @@
 from dataclasses import dataclass, asdict
 from datetime import datetime
+from hashlib import sha256 as checksum
+import json
 
 from . import renderers
 from .logging import log
 
+JSON_PARAMS = dict(
+    default=repr,
+    ensure_ascii=False,
+    indent=2,
+    sort_keys=True,
+)
 
 @dataclass
 class MicroblogEntry:
@@ -37,3 +45,14 @@ class MicroblogEntry:
         output = asdict(self)
         output['timestamp'] = self.isotime()
         return output
+
+    @property
+    def uid(self):
+        timestamp = self.timestamp.strftime('%Y%m%d_%H%M%S_%f')
+        constants = dict(
+            timestamp=self.timestamp,
+            author=self.author,
+        )
+        suffix = checksum(json.dumps(constants, **JSON_PARAMS).encode()).hexdigest()
+        uid = f'{timestamp}_{suffix[-6:]}'
+        return uid
