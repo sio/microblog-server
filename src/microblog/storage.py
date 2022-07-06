@@ -42,6 +42,10 @@ class MicroblogStorage(ABC):
     def attachment(self, entry, name, writable=False):
         '''Context manager that yields a file-like objects for writing attachments to'''
 
+    @abstractmethod
+    def attached_names(self, entry):
+        '''Yield attachment names for a microblog entry'''
+
     def latest(self):
         '''Return the latest microblog entry'''
         try:
@@ -87,7 +91,15 @@ class GitStorage(MicroblogStorage):
             raise RuntimeError(f'Can not save attachments for unsaved entry: {entry.uid}')
         with open(path, 'wb' if writable else 'rb') as f:
             yield f
-        self._commit(path, f'Attachment: {path.name}')
+        if writable:
+            self._commit(path, f'Attachment: {path.name}')
+
+    def attached_names(self, entry):
+        path = self._path(entry.uid)
+        for attached in sorted(path.parent.glob(f'{path.name}*')):
+            if attached.name == path.name:
+                continue
+            yield attached.name[len(path.name) + len('+'):]
 
     def read(self, uid):
         filename = self._path(uid)

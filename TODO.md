@@ -2,7 +2,6 @@
 
 ## Storage
 
-- Iterate over attachments for a given entry
 - Optimize images when saving
 - Strip EXIF information from photos
 
