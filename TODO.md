@@ -11,7 +11,6 @@
 
 ## Rendering
 
-- Generate RSS/Atom feeds for microblog
 - Trigger GitHub actions for main Pelican repo when this repo is pushed to
 
 ## Deployment

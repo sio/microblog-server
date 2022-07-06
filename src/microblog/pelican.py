@@ -39,6 +39,10 @@ class MicroblogGenerator(Generator):
             'MICROBLOG_PAGE_SAVE_AS',
             self.micro_url if self.micro_url.endswith('.html') else f'{self.micro_url}/index.html'
         )
+        self.micro_feed = self.settings.get(
+            'MICROBLOG_FEED_ATOM',
+            'feeds/microblog.atom.xml'
+        )
         pagination = self.settings['PAGINATED_TEMPLATES']
         if 'micros' not in pagination:
             pagination['micros'] = 100  # default settings
@@ -68,6 +72,24 @@ class MicroblogGenerator(Generator):
                 template_name='micro',
                 url=self.micro_url.format(uid=uid),
             )
+        feed_items = []
+        max_feed_items = 100
+        for num, uid in enumerate(uids):
+            if num == max_feed_items:
+                break
+            entry=self.microblog.read(uid)
+            feed_items.append(FeedItem(
+                entry=entry,
+                url=self.micro_url.format(uid=uid),
+                attached=self.microblog.attached_names(entry),
+                siteurl=self.settings['SITEURL'],
+            ))
+        writer.write_feed(
+            feed_items,
+            context,
+            feed_title='Microblog',
+            path=self.micro_feed,
+        )
 
 def save_attachments(writer, microblog, entry):
     for num, name in enumerate(microblog.attached_names(entry), start=1):
@@ -82,3 +104,20 @@ def save_attachments(writer, microblog, entry):
 def attachment_url(entry_uid, attachment_num):
     uid_hash = checksum(entry_uid.encode()).hexdigest()
     return f'micro/img/{uid_hash}-{attachment_num}'
+
+
+class FeedItem:
+    '''Convert MicroblogEntry to an item for Pelican feed generator'''
+
+    def __init__(self, entry, url, attached, siteurl):
+        self.title = f'{entry.author} / {entry.timestamp.strftime("%Y-%m-%d %H:%M")}'
+        self.url = url
+        self.summary = entry.html
+        self.category = 'microblog'
+        self.date = entry.timestamp
+        self.author = entry.author
+        for num, name in enumerate(attached, start=1):
+            self.summary += f'<br/><img src="{siteurl}/{attachment_url(entry.uid, num)}">'
+
+    def get_content(self, *a, **ka):
+        return self.summary
