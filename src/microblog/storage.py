@@ -146,7 +146,8 @@ class GitStorage(MicroblogStorage):
         try:
             local_branch = repo.active_branch
         except TypeError as exc:
-            if 'HEAD is detached' in str(exc):
+            error_words = set(str(exc).split())
+            if 'HEAD' in error_words and 'detached' in error_words:
                 return
             raise exc
         remote_branch = repo.active_branch.tracking_branch()
