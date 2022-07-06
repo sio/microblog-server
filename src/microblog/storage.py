@@ -39,7 +39,7 @@ class MicroblogStorage(ABC):
         '''Yield saved uids in reverse chronological order'''
 
     @abstractmethod
-    def attachment(self, entry):
+    def attachment(self, entry, name, writable=False):
         '''Context manager that yields a file-like objects for writing attachments to'''
 
     def latest(self):
@@ -81,7 +81,7 @@ class GitStorage(MicroblogStorage):
         return uid
 
     @contextmanager
-    def attachment(self, entry, name=None, writable=False):
+    def attachment(self, entry, name, writable=False):
         path = self._path(entry.uid, suffix=name)
         if not path.parent.exists():
             raise RuntimeError(f'Can not save attachments for unsaved entry: {entry.uid}')
