@@ -131,16 +131,19 @@ class GitStorage(MicroblogStorage):
         repo = self.repo
         local_branch = repo.active_branch
         remote_branch = repo.active_branch.tracking_branch()
-        if remote_branch:
-            if remote_branch.commit == local_branch.commit:
-                return
-            for remote in repo.remotes:
-                try:
-                    remote.push().raise_if_error()
-                except Exception as e:
-                    log.exception(f'Error while pushing to remote: {remote}')
-        else:
+        if not remote_branch:
             log.warning(f'Not pushing, no tracking branch configured')
+            return
+        if remote_branch.commit == local_branch.commit:
+            return
+        remote = repo.remote(remote_branch.remote_name)
+        try:
+            remote.push().raise_if_error()
+        except Exception as e:
+            log.exception(f'Error while pushing {local_branch} to {remote_branch}, attempting rebase')
+            remote.pull(rebase=True)
+            remote.push().raise_if_error()
+            log.info(f'Rebase successful: {remote_branch}')
 
     def _pusher(self):
         '''Thread that pushes changes regularly'''
