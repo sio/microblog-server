@@ -57,7 +57,6 @@ class TelegramInput(MicroblogInput):
 
     async def microblog(self, update, context):
         '''Save microblog message to storage'''
-        response = []
         user = update.effective_user
         message = update.effective_message
         entry = MicroblogEntry(
@@ -77,9 +76,9 @@ class TelegramInput(MicroblogInput):
             and 0 <= delay.total_seconds() <= max_delay \
             and entry.author == prev.author:
                 entry = prev
-                response.append('Attached photos to previous microblog entry')
+                log.debug('Attaching photos to previous microblog entry')
         uid = self.storage.save(entry)
-        response.append(f'Saved microblog entry: {uid}')
+        log.debug(f'Saved microblog entry: {uid}')
 
         photos_seen = set()
         for photo in sorted(message.photo, key=lambda x: x.width, reverse=True):
@@ -94,7 +93,7 @@ class TelegramInput(MicroblogInput):
                 await remote.download(out=local)
                 log.debug(f'Downloaded photo: {name}')
 
-        await message.reply_text('\n'.join(response))
+        await message.reply_text('Ok')
 
     async def hello(self, update, context):
         if not self.allowed(update):
