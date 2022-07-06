@@ -139,11 +139,16 @@ class GitStorage(MicroblogStorage):
         else:
             if commit.parents:
                 log.debug(f'Reverting empty commit: {commit}')
-                repo.active_branch.commit = parent
+                repo.head.commit = parent
 
     def _push(self):
         repo = self.repo
-        local_branch = repo.active_branch
+        try:
+            local_branch = repo.active_branch
+        except TypeError as exc:
+            if 'HEAD is detached' in str(exc):
+                return
+            raise exc
         remote_branch = repo.active_branch.tracking_branch()
         if not remote_branch:
             log.warning(f'Not pushing, no tracking branch configured')
