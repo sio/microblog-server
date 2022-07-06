@@ -3,7 +3,6 @@
 ## Storage
 
 - Optimize images when saving
-- Do not create empty commits
 
 ## Input
 

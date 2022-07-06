@@ -119,13 +119,11 @@ class GitStorage(MicroblogStorage):
         if not message:
             message = str(path)
         commit = repo.index.commit(message, author=self._actor, committer=self._actor)
-        has_parents = False
-        for parent in commit.iter_parents():
-            has_parents = True
+        for parent in commit.parents:
             if commit.tree != parent.tree:
                 break
         else:
-            if has_parents:
+            if commit.parents:
                 log.debug(f'Reverting empty commit: {commit}')
                 repo.active_branch.commit = parent
 
