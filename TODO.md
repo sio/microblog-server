@@ -3,6 +3,7 @@
 ## Storage
 
 - Optimize images when saving
+- Strip EXIF information from photos
 
 ## Input
 
