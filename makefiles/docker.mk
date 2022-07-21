@@ -9,6 +9,10 @@ DOCKER_TAG?=latest
 export DOCKER_REGISTRY_PASSWD
 
 
+# Enable BuildKit for --chmod
+export DOCKER_BUILDKIT=1
+
+
 .PHONY: docker-build
 docker-build:
 	$(DOCKER) build --pull --tag "$(DOCKER_REPO):$(DOCKER_TAG)" --file $(DOCKER_FILE) $(DOCKER_CONTEXT)
