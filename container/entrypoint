@@ -17,7 +17,7 @@ then
     ssh='git@github.com:'
     if [[ "$MICROBLOG_REPO_URL" == $http* ]]
     then
-        git remote set-url --push origin "${MICROBLOG_REPO_URL//$http/$ssh}"
+        git -C "$MICROBLOG_STORAGE" remote set-url --push origin "${MICROBLOG_REPO_URL//$http/$ssh}"
     fi
 fi
 
