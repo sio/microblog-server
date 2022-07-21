@@ -1,5 +1,6 @@
 DOCKER?=docker
-DOCKER_FILE?=Dockerfile
+DOCKER_FILE?=container/Dockerfile
+DOCKER_CONTEXT=.
 DOCKER_REGISTRY?=ghcr.io
 DOCKER_REGISTRY_PASSWD?=
 DOCKER_USER?=sio
@@ -10,7 +11,7 @@ export DOCKER_REGISTRY_PASSWD
 
 .PHONY: docker-build
 docker-build:
-	$(DOCKER) build --pull --tag "$(DOCKER_REPO):$(DOCKER_TAG)" --file $(DOCKER_FILE) $(dir $(DOCKER_FILE))
+	$(DOCKER) build --pull --tag "$(DOCKER_REPO):$(DOCKER_TAG)" --file $(DOCKER_FILE) $(DOCKER_CONTEXT)
 
 
 .PHONY: docker-push
