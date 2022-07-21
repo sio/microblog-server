@@ -1,0 +1,25 @@
+#!/bin/bash
+
+# Strict mode: http://redsymbol.net/articles/unofficial-bash-strict-mode/
+set -euo pipefail
+IFS=$'\n\t'
+
+# Verbose execution
+set -v
+
+# Setup storage repo
+if [[ ! -d "$MICROBLOG_STORAGE/.git" ]]
+then
+    mkdir -p "$(dirname "$MICROBLOG_STORAGE")"
+    git clone "$MICROBLOG_REPO_URL" "$MICROBLOG_STORAGE"
+
+    http='http*://github.com/'
+    ssh='git@github.com:'
+    if [[ "$MICROBLOG_REPO_URL" == $http* ]]
+    then
+        git remote set-url --push origin "${MICROBLOG_REPO_URL//$http/$ssh}"
+    fi
+fi
+
+# Launch Telegram bot
+exec microblog
