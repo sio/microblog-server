@@ -7,6 +7,9 @@ IFS=$'\n\t'
 # Verbose execution
 set -v
 
+# Add current uid to /etc/passwd
+/usr/local/bin/addpasswd
+
 # Setup storage repo
 if [[ ! -d "$MICROBLOG_STORAGE/.git" ]]
 then
