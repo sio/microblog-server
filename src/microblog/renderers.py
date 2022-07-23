@@ -4,6 +4,7 @@ Convert different markups to HTML
 
 import html
 import re
+from textwrap import shorten
 
 import markdown as md
 
@@ -21,7 +22,8 @@ def plaintext(text, escape=html.escape):
             if not chunk.strip():
                 continue
             if URL.fullmatch(chunk):
-                chunks.append(f'<a href="{chunk}">{escape(chunk)}</a>')
+                visible = shorten(escape(chunk), width=80, placeholder="…")
+                chunks.append(f'<a href="{chunk}">{visible}</a>')
             else:
                 chunks.append(escape(chunk))
         paragraph = '\n'.join(chunks)
