@@ -10,9 +10,11 @@ import markdown as md
 
 
 URL = re.compile(r'((?:https?|mailto|ftp|gopher|gemini)://\S+)', re.IGNORECASE)
+SLASH = re.compile(r'([^/])/([^/])')
 
 
 def plaintext(text, escape=html.escape):
+    placeholder = "…"
     output = []
     for paragraph in text.split('\n\n'):
         if not paragraph.strip():
@@ -22,7 +24,8 @@ def plaintext(text, escape=html.escape):
             if not chunk.strip():
                 continue
             if URL.fullmatch(chunk):
-                visible = shorten(escape(chunk), width=80, placeholder="…")
+                short = shorten(SLASH.sub(r'\1 \2', chunk), width=80, placeholder=placeholder)
+                visible = chunk[:len(short)] + short[-len(placeholder):]
                 chunks.append(f'<a href="{chunk}">{visible}</a>')
             else:
                 chunks.append(escape(chunk))
