@@ -25,8 +25,10 @@ def plaintext(text, escape=html.escape):
                 continue
             if URL.fullmatch(chunk):
                 short = shorten(SLASH.sub(r'\1 \2', chunk), width=80, placeholder=placeholder)
-                visible = chunk[:len(short)] + short[-len(placeholder):]
-                chunks.append(f'<a href="{chunk}">{visible}</a>')
+                visible = chunk
+                if len(short) < len(chunk) and short.endswith(placeholder):
+                    visible = chunk[:len(short)-len(placeholder)+1] + placeholder
+                chunks.append(f'<a href="{chunk}">{escape(visible)}</a>')
             else:
                 chunks.append(escape(chunk))
         paragraph = '\n'.join(chunks)
