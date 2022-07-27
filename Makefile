@@ -2,6 +2,8 @@ SETUP_PY=setup.cfg
 include Makefile.venv
 include makefiles/*.mk
 
+dist: src pyproject.toml setup.cfg Makefile makefiles
+
 .PHONY: run
 run: | venv
 	$(VENV)/microblog
