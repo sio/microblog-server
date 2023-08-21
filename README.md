@@ -57,16 +57,16 @@ MICROBLOG = microblog.storage.GitStorage('./path/to/local/copy/of/git/repo/')
 Your theme is expected to provide the following templates:
 
 - `micros` for paginated microblog index
-  ([example](https://github.com/sio/potyarkin.ml/blob/5afe24bd07f3f065b3ab8f7026960757748d0bfc/content/templates/micros.html))
+  ([example](https://github.com/sio/potyarkin.com/blob/5afe24bd07f3f065b3ab8f7026960757748d0bfc/content/templates/micros.html))
 - `micro` for individual microblog entries
-  ([example](https://github.com/sio/potyarkin.ml/blob/5afe24bd07f3f065b3ab8f7026960757748d0bfc/content/templates/micro.html))
+  ([example](https://github.com/sio/potyarkin.com/blob/5afe24bd07f3f065b3ab8f7026960757748d0bfc/content/templates/micro.html))
 
 Check [plugin source] for further information.
 See author's site [configuration] for further examples.
 
 [Pelican docs]: https://docs.getpelican.com/en/latest/
 [plugin source]: src/microblog/pelican.py
-[configuration]: https://github.com/sio/potyarkin.ml/blob/5afe24bd07f3f065b3ab8f7026960757748d0bfc/pelicanconf.py#L146-L148
+[configuration]: https://github.com/sio/potyarkin.com/blob/5afe24bd07f3f065b3ab8f7026960757748d0bfc/pelicanconf.py#L146-L148
 
 
 ## License and copyright

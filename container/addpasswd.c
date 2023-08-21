@@ -9,7 +9,7 @@
  *
  * This is a workaround to OpenSSH client refusing to work when current uid is
  * not found in /etc/passwd:
- *    https://potyarkin.ml/posts/2022/no-user-exists-for-uid/
+ *    https://potyarkin.com/posts/2022/no-user-exists-for-uid/
  *    https://superuser.com/questions/1704482/run-ssh-as-a-non-existent-virtual-user
  */
 int main() {
